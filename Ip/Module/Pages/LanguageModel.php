@@ -8,6 +8,25 @@
 namespace Ip\Module\Pages;
 
 class LanguageModel{
+    //TODOX review
+
+    public function addLanguage($code, $url, $d_long = '', $d_short = '', $visible = true, $text_direction='ltr'){
+
+        if (($code!='') && ($url!='')){
+            $data['code'] = $code;
+            $data['url'] = $url;
+            $data['d_long'] = $d_long;
+            $data['d_short'] = $d_short;
+            $data['visible'] = $visible;
+            $data['text_direction'] = $text_direction;
+            $id = IpDb()->insert(DB_PREF . 'language', $data);
+
+            $this->afterInsert($id);
+            return true;
+        }else{
+            trigger_error("Can't create language. Missing URL or language code.");
+        }
+    }
 
     public function updateLanguage($languageId, $data) {
 
@@ -32,8 +51,8 @@ class LanguageModel{
         }
     }
 
-    private static function afterInsert($id) {
-        self::createRootZoneElement($id);
+    private function afterInsert($id) {
+        $this->createRootZoneElement($id);
     }
 
     private function afterDelete($id) {

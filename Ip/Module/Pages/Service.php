@@ -11,6 +11,12 @@ use Ip\Form\Exception;
 
 class Service
 {
+
+    public static function addLanguage($code, $url, $d_long = '', $d_short = '', $visible = true, $text_direction='ltr') {
+        $languageModel = new \Ip\Module\Pages\LanguageModel();
+        $languageModel->addLanguage($code, $url, $d_long, $d_short, false);
+    }
+
     public static function addZone($title, $zoneName, $associatedModule, $defaultLayout, $associatedGroup = '', $description = '', $url = '') {
 
         $content = new \Ip\Content();
