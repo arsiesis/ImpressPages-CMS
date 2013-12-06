@@ -13,6 +13,8 @@ class LanguageModel{
     public function addLanguage($code, $url, $d_long = '', $d_short = '', $visible = true, $text_direction='ltr'){
 
         if (($code!='') && ($url!='')){
+
+            $data = Array();
             $data['code'] = $code;
             $data['url'] = $url;
             $data['d_long'] = $d_long;
@@ -21,7 +23,19 @@ class LanguageModel{
             $data['text_direction'] = $text_direction;
             $id = IpDb()->insert(DB_PREF . 'language', $data);
 
+//
+//            $data = Array();
+//            description
+//            keywords
+//            title
+//            url
+//            zone_id
+//            language_id
+//            translation
+//              $id = IpDb()->insert(DB_PREF . 'zone_parameter', $data);
+
             $this->afterInsert($id);
+
             return true;
         }else{
             trigger_error("Can't create language. Missing URL or language code.");
@@ -131,7 +145,7 @@ class LanguageModel{
         return $result;
     }
 
-    private function getLanguageByUrl($url) {
+    public static function getLanguageByUrl($url) {
         $sql = "
             SELECT
                 *
@@ -181,38 +195,55 @@ class LanguageModel{
     private function createRootZoneElement($language) {
         $firstLanguage = \Ip\Internal\ContentDb::getFirstLanguage();
         $zones = \Ip\Internal\ContentDb::getZones($firstLanguage['id']);
+
+
+
         foreach($zones as $key => $zone) {
-            $sql2 = "insert into `".DB_PREF."zone_parameter` set
-        language_id = '".mysql_real_escape_string($language)."',
-        zone_id = '".$zone['id']."',
-        title = '".mysql_real_escape_string($this->newUrl($language, $zone['title']))."',
-        url = '".mysql_real_escape_string($this->newUrl($language, $zone['url']))."'";
-            $rs2 = mysql_query($sql2);
-            if(!$rs2)
-                trigger_error($sql2." ".mysql_error());
+                $sql2 = "insert into `".DB_PREF."zone_parameter` set
+            `language_id` = :language_id,
+            `zone_id` = :zone_id,
+            `title` = :title,
+            `url` = :url";
+
+            $params = array(
+                'language_id' => $language,
+                'zone_id' => $zone['id'],
+                'title' => $this->newUrl($language, $zone['title']),
+                'url' => $this->newUrl($language, $zone['url'])
+            );
+
+
+            ipDb()->execute($sql2, $params);
         }
     }
 
 
     private function newUrl($language, $url = 'zone') {
-        $sql = "select url from `".DB_PREF."zone_parameter` where `language_id` = '".mysql_real_escape_string($language)."' ";
-        $rs = mysql_query($sql);
-        if($rs) {
-            $urls = array();
-            while($lock = mysql_fetch_assoc($rs))
-                $urls[$lock['url']] = 1;
+        $sql = "
+            SELECT
+                `url`
+            FROM
+                `".DB_PREF."zone_parameter`
+            WHERE
+                `language_id` = :languageId
+        ";
+        $params = array(
+            'languageId' => $language
+        );
+        $results = ipDb()->fetchAll($sql, $params);
 
-            if (isset($urls[$url])) {
-                $i = 1;
-                while(isset($urls[$url.$i])) {
-                    $i++;
-                }
-                return $url.$i;
-            } else {
-                return $url;
+        foreach ($results as $lock) {
+            $urls[$lock['url']] = 1;
+        }
+
+        if (isset($urls[$url])) {
+            $i = 1;
+            while(isset($urls[$url.$i])) {
+                $i++;
             }
-        }else {
-            trigger_error("Can't get all urls ".$sql." ");
+            return $url.$i;
+        } else {
+            return $url;
         }
     }
 
