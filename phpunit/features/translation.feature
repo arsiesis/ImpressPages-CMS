@@ -14,8 +14,3 @@ Feature: Translation
     """
     When I do nothing
     Then __("title", "theme-SampleTheme") should return "Pavadinimas"
-
-  Scenario: ImpressPages messages
-    Given I want to translate ImpressPages
-    When
-    Then messages should be translated using xliff
