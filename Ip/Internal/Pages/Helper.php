@@ -30,16 +30,7 @@ class Helper
 
     public static function zoneList()
     {
-        $answer = array();
-        $zones = Db::getZones(ipContent()->getCurrentLanguage()->getId());
-        foreach($zones as $zone)
-        {
-            $answer[] = array(
-                'name' => $zone['name'],
-                'title' => $zone['translation']
-            );
-        }
-        return $answer;
+        return Db::getZones(ipContent()->getCurrentLanguage()->getId());
     }
 
     public static function zoneForm($zoneName)
@@ -145,10 +136,11 @@ class Helper
 
     }
 
-    public static function pagePropertiesForm($zoneName, $pageId)
+    public static function pagePropertiesForm($navigationId)
     {
-        $zone = ipContent()->getZone($zoneName);
-        $page = $zone->getPage($pageId);
+        $navigation = ipDb()->selectRow('*', 'navigation', array('id' => $navigationId));
+
+        $page = new \Ip\Page($navigation['pageId'], 'page');
 
         $form = new \Ip\Form();
 
@@ -163,15 +155,7 @@ class Helper
         $field = new \Ip\Form\Field\Hidden(
             array(
                 'name' => 'pageId',
-                'value' => $pageId
-            ));
-        $form->addField($field);
-
-
-        $field = new \Ip\Form\Field\Hidden(
-            array(
-                'name' => 'zoneName',
-                'value' => $zoneName
+                'value' => $navigationId
             ));
         $form->addField($field);
 
@@ -179,7 +163,7 @@ class Helper
             array(
                 'name' => 'navigationTitle',
                 'label' => __('Navigation title', 'ipAdmin', false),
-                'value' => $page->getNavigationTitle()
+                'value' => $navigation['navigationTitle'],
             ));
         $form->addField($field);
 
@@ -211,7 +195,7 @@ class Helper
             array(
                 'name' => 'url',
                 'label' => __('Url', 'ipAdmin', false),
-                'value' => $page->getUrl()
+                'value' => $navigation['slug']
             ));
         $form->addField($field);
 
@@ -220,7 +204,6 @@ class Helper
             array(
                 'name' => 'visible',
                 'label' => __('Visible', 'ipAdmin', false),
-                'value' => 1,
                 'value' => $page->isVisible()
             ));
         $form->addField($field);
@@ -232,13 +215,11 @@ class Helper
             $options[] = array ($layout, $layout);
         }
 
-        $curLayout = \Ip\Internal\ContentDb::getPageLayout(
-            $zone->getAssociatedModule(),
-            $page->getId()
-        );
-        if (!$curLayout) {
-            $curLayout = $zone->getLayout();
-        }
+        $curLayout = \Ip\Internal\ContentDb::getPageLayout($page->getId());
+
+//        if (!$curLayout) {
+//            $curLayout = $zone->getLayout();
+//        }
         $field = new \Ip\Form\Field\Select(
             array(
                 'name' => 'layout',

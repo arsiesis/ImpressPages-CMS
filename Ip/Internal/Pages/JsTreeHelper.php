@@ -10,22 +10,27 @@ namespace Ip\Internal\Pages;
 class JsTreeHelper
 {
 
-    public static function getPageTree($languageId, $zoneName)
+    public static function getPageTree($languageId, $menuName)
     {
-        $answer = self::getList($languageId, $zoneName, null);
+        $answer = self::getList($languageId, $menuName, null);
         return $answer;
     }
 
     /**
      * @param $languageId
-     * @param $zoneName
+     * @param $menuName
      * @param \Ip\Page[] $pages
      * @return array
      */
-    protected static function getList ($languageId, $zoneName, $parentId = null)
+    protected static function getList ($languageId, $menuName, $parentId = null)
     {
-        $zone = ipContent()->getzone($zoneName);
-        $pages = $zone->getPages($languageId, $parentId, 0, null, true);
+        $navigation = ipDb()->selectRow('*', 'navigation', array('name' => $menuName));
+
+        if (!$parentId) {
+            $parentId = 0;
+        }
+
+        $pages = ipDb()->selectAll('*', 'navigation', array('parentId' => $parentId), 'ORDER BY `pageOrder`');
 
         $answer = array();
 
@@ -36,12 +41,12 @@ class JsTreeHelper
 
             $pageData['state'] = 'closed';
 
-            $jsTreeId = self::_jsTreeId($languageId, $zoneName, $page->getId());
+            $jsTreeId = self::_jsTreeId($languageId, $menuName, $page['id']);
             if (!empty($_SESSION['Pages.nodeOpen'][$jsTreeId])) {
                 $pageData['state'] = 'open';
             }
 
-            $children = self::getList($languageId, $zoneName, $page->getId());
+            $children = self::getList($languageId, $menuName, $page['id']);
             if (count($children) === 0) {
                 $pageData['children'] = false;
                 $pageData['state'] = 'leaf';
@@ -49,24 +54,24 @@ class JsTreeHelper
             $pageData['children'] = $children;
 
 
-            if ($page->isVisible()) {
+            if (!$page['isActive']) {
                 $icon = '';
             } else {
                 $icon = ipFileUrl('Ip/Internal/Pages/assets/img/file_hidden.png');
             }
 
-
-            $pageData['attr'] = array('id' => $jsTreeId, 'rel' => 'page', 'languageId' => $languageId, 'zoneName' => $zoneName, 'pageId' => $page->getId());
-            $pageData['data'] = array ('title' => $page->getNavigationTitle() . '', 'icon' => $icon); //transform null into empty string. Null break JStree into infinite loop
+            $pageData['attr'] = array('id' => $jsTreeId, 'rel' => 'page', 'languageId' => $languageId, 'zoneName' => $menuName, 'pageId' => $page['id']);
+            $title = $page['navigationTitle'] ? $page['navigationTitle'] : ipDb()->selectValue('page_title', 'page', array('id' => $page['pageId']));
+            $pageData['data'] = array ('title' => $title . '', 'icon' => $icon); //transform null into empty string. Null break JStree into infinite loop
             $answer[] = $pageData;
         }
 
         return $answer;
     }
 
-    protected static function _jsTreeId($languageId, $zoneName, $pageId)
+    protected static function _jsTreeId($languageId, $menuName, $pageId)
     {
-        return 'page_' . $languageId . '_' . $zoneName . '_' . $pageId;
+        return 'page_' . $languageId . '_' . $menuName . '_' . $pageId;
     }
 
 

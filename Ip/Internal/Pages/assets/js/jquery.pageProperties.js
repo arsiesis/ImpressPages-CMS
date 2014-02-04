@@ -15,8 +15,7 @@
                 $this.html('');
 
                 var data = Object();
-                data.pageId = options.pageId;
-                data.zoneName = options.zoneName;
+                data.navigationId = options.navigationId;
                 data.aa = 'Pages.pagePropertiesForm';
                 data.securityToken = ip.securityToken;
 

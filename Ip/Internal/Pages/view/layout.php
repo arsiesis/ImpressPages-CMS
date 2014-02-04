@@ -22,7 +22,7 @@
     </div>
     <div class="ipsPages pages navBlock">
         <div ng-repeat="language in languages" class="language" ng-show="language.id == activeLanguage.id">
-            <div ng-repeat="zone in zones" class="tree" ng-show="zone.name == activeZone.name">
+            <div ng-repeat="zone in zones" class="tree" ng-show="zone.name == activeMenu.name">
                 <div id="pages_{{language.id}}_{{zone.name}}">
                     <ul class="actions">
                         <button ng-click="addPageModal()" class="ipsAddPage btn btn-default" role="button" >

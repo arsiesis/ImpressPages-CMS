@@ -25,7 +25,7 @@ var ipPages = null;
 
         //init
         $scope.activeLanguage = {id: null};
-        $scope.activeZone = {name: ''};
+        $scope.activeMenu = {name: ''};
         $scope.copyPageId = false;
         $scope.cutPageId = false;
         $scope.selectedPageId = null;
@@ -34,18 +34,18 @@ var ipPages = null;
         $scope.initialized = false;
 
         $scope.$on('PathChanged', function (event, path) {
-            var zoneName = getHashParams().zone;
+            var menuName = getHashParams().menu;
             var languageId = getHashParams().language;
-            var pageId = getHashParams().page;
+            var navigationId = getHashParams().navigation;
 
             if (!$scope.initialized) {
                 if (languageId == null) {
                     languageId = languageList[0].id;
                 }
-                if (zoneName == null) {
-                    zoneName = zoneList[0].name;
-                }
+            }
 
+            if (!menuName) {
+                menuName = 'home';
             }
 
             if (languageId && languageId != $scope.activeLanguage.id) {
@@ -56,30 +56,24 @@ var ipPages = null;
                 });
             }
 
-
-            if (zoneName && zoneName != $scope.activeZone.name) {
-                $.each(zoneList, function (key, value) {
-                    if (value.name == zoneName) {
-                        $scope.activateZone(value);
-                    }
-                });
+            if (menuName && menuName != $scope.activeMenu.name) {
+                $scope.activateMenu(menuName);
             }
-            ;
 
 
-            if (pageId && pageId != $scope.selectedPageId) {
-                $scope.activatePage(pageId, $scope.activeZone.name);
+            if (navigationId && navigationId != $scope.selectedPageId) {
+                $scope.activatePage(navigationId, $scope.activeMenu.name);
             }
 
         });
 
 
         $scope.setZoneHash = function (zone) {
-            updateHash(null, zone.name, false);
+            updateHash(null, zone.id);
         }
 
         $scope.setLanguageHash = function (language) {
-            updateHash(language.id, null, false);
+            updateHash(language.id, null);
         }
 
 
@@ -88,18 +82,18 @@ var ipPages = null;
             initTree();
         }
 
-        $scope.activateZone = function (zone) {
-            $scope.activeZone = zone;
+        $scope.activateMenu = function (menuName) {
+            $scope.activeMenu = {'name': menuName};
             $scope.selectedPageId = null;
             initTree();
         }
 
-        $scope.activatePage = function (pageId, zoneName) {
-            $scope.selectedPageId = pageId;
+        $scope.activatePage = function (navigationId, menuName) {
+            $scope.selectedPageId = navigationId;
             var $properties = $('.ipsProperties');
             $properties.ipPageProperties({
-                pageId: pageId,
-                zoneName: zoneName
+                navigationId: navigationId,
+                menuName: menuName
             });
             $properties.off('update.ipPages').on('update.ipPages', function () {
                 getJsTree().set_text(getJsTree().get_selected(), $properties.find('input[name=navigationTitle]').val());
@@ -140,7 +134,7 @@ var ipPages = null;
 
             var data = {
                 aa: 'Pages.updateZoneForm',
-                zoneName: zone.name
+                menuName: zone.name
             }
 
             $.ajax({
@@ -240,9 +234,9 @@ var ipPages = null;
                 var position = node.index() + 1;
             }
             if ($scope.cutPageId) {
-                movePage($scope.cutPageId, $scope.activeLanguage.id, $scope.activeZone.name, $scope.selectedPageId, position, true);
+                movePage($scope.cutPageId, $scope.activeLanguage.id, $scope.activeMenu.name, $scope.selectedPageId, position, true);
             } else {
-                copyPage($scope.copyPageId, $scope.activeLanguage.id, $scope.activeZone.name, $scope.selectedPageId, position, function () {
+                copyPage($scope.copyPageId, $scope.activeLanguage.id, $scope.activeMenu.name, $scope.selectedPageId, position, function () {
                     refresh();
                 });
             }
@@ -251,7 +245,7 @@ var ipPages = null;
 
         var initTree = function () {
             $scope.selectedPageId = null;
-            getTreeDiv().ipPageTree({languageId: $scope.activeLanguage.id, zoneName: $scope.activeZone.name});
+            getTreeDiv().ipPageTree({languageId: $scope.activeLanguage.id, menuName: $scope.activeMenu.name});
             getTreeDiv().off('select_node.jstree').on('select_node.jstree', function (e) {
                 var node = getJsTree().get_selected();
                 updateHash(null, null, node.attr('pageId'));
@@ -266,7 +260,7 @@ var ipPages = null;
                         destinationPageId = null;
                     }
                     var destinationPosition = moveData.rslt.cp + i;
-                    movePage(pageId, $scope.activeLanguage.id, $scope.activeZone.name, destinationPageId, destinationPosition);
+                    movePage(pageId, $scope.activeLanguage.id, $scope.activeMenu.name, destinationPageId, destinationPosition);
                 });
             });
 
@@ -275,16 +269,16 @@ var ipPages = null;
 
 
         var getTreeDiv = function () {
-            return $('#pages_' + $scope.activeLanguage.id + '_' + $scope.activeZone.name).find('.ipsTree');
+            return $('#pages_' + $scope.activeLanguage.id + '_' + $scope.activeMenu.name).find('.ipsTree');
         }
 
         var getJsTree = function () {
-            return $.jstree._reference('#pages_' + $scope.activeLanguage.id + '_' + $scope.activeZone.name + ' .ipsTree');
+            return $.jstree._reference('#pages_' + $scope.activeLanguage.id + '_' + $scope.activeMenu.name + ' .ipsTree');
         }
 
         var refresh = function () {
             $('.ipsTree').ipPageTree('destroy');
-            $scope.activateZone($scope.activeZone);
+            $scope.activateMenu($scope.activeMenu.name);
             $scope.$apply();
         }
 
@@ -295,7 +289,7 @@ var ipPages = null;
                 securityToken: ip.securityToken,
                 title: title,
                 visible: visible,
-                zoneName: $scope.activeZone.name,
+                zoneName: $scope.activeMenu.name,
                 languageId: $scope.activeLanguage.id
             };
 
@@ -445,19 +439,22 @@ var ipPages = null;
             });
         }
 
-        var updateHash = function (languageId, zoneName, pageId) {
+        var updateHash = function (languageId, menuName, navigationId) {
             if (languageId === null) {
                 languageId = $scope.activeLanguage.id;
             }
-            if (zoneName === null) {
-                zoneName = $scope.activeZone.name
+
+            if (menuName === null) {
+                menuName = $scope.activeMenu.name;
             }
-            if (pageId === null) {
-                pageId = $scope.selectedPageId;
+
+            if (navigationId === null) {
+                navigationId = $scope.selectedPageId;
             }
-            var path = 'hash&language=' + languageId + '&zone=' + zoneName;
-            if (pageId) {
-                path = path + '&page=' + pageId;
+
+            var path = 'hash&language=' + languageId + '&menuName=' + menuName;
+            if (navigationId) {
+                path = path + '&navigation=' + navigationId;
             }
             $location.path(path);
         }

@@ -177,6 +177,8 @@ class Db {
      */
     public static function getZones($languageId)
     {
+        return ipDb()->selectAll('*, `navigationTitle` AS `title`', 'navigation', array('languageId' => $languageId, 'parentId' => 0), 'ORDER BY `pageOrder`');
+
         $sql = 'SELECT m.*, p.url, p.description, p.keywords, p.title
                 FROM ' . ipTable('zone', 'm') . ', ' . ipTable('zone_to_language', 'p') . '
                 WHERE
@@ -438,7 +440,20 @@ class Db {
             $row['cached_text'] = $params['cached_text'];
         }
 
-        return ipDb()->insert('page', $row);
+        $pageId = ipDb()->insert('page', $row);
+
+        $navigationRecord = array(
+            'pageId' => $pageId,
+        );
+
+        if (!empty($row['url'])) {
+            $navigationRecord['uri'] = $row['url'];
+        }
+
+        $navigationRecord['languageId'] = ipDb()->selectValue('languageId', 'navigation', array('id' => $parentId));
+        $navigationRecord['parentId'] = $parentId;
+        // $navigationRecord['pageOrder'] = ?
+        ipDb()->insert('navigation', $navigationRecord);
     }
 
     private static function getMaxIndex($parentId) {

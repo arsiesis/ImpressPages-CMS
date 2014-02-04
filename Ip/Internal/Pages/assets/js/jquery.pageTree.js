@@ -9,6 +9,7 @@
 
     var methods = {
         init : function(options) {
+            console.log('jquery.pageTree.js', options);
             return this.each(function() {
                 var $this = $(this);
 
@@ -17,11 +18,11 @@
                 // If the plugin hasn't been initialized yet
                 if ( ! data ) {
                     $this.data('ipPageTree', {
-                        zoneName: options.zoneName,
+                        menuName: options.menuName,
                         languageId: options.languageId
                     });
 
-                    $.proxy(refresh, $this)(options.zoneName, options.languageId);
+                    $.proxy(refresh, $this)(options.menuName, options.languageId);
                 } else {
                     $this.jstree('deselect_all');
                 }
@@ -36,7 +37,7 @@
                 $this.ipPageTree('destroy');
 
                 $this.ipPageTree({
-                    zoneName: data.zoneName,
+                    menuName: data.menuName,
                     languageId: data.languageId
                 });
             });
@@ -55,10 +56,10 @@
 
     };
 
-    var refresh = function (zoneName, languageId) {
+    var refresh = function (menuName, languageId) {
         var $this = this;
         var data = {
-            zoneName : zoneName,
+            menuName : menuName,
             languageId : languageId,
             aa : 'Pages.getPages'
         };
@@ -96,6 +97,8 @@
         plugins.push('crrm');
         plugins.push('dnd');
         //plugins.push('contextmenu');
+
+        console.log('$this', $this);
 
         $this.jstree({
 

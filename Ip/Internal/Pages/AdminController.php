@@ -45,13 +45,13 @@ class AdminController extends \Ip\Controller
         }
         $languageId = (int)$data['languageId'];
 
-        if (empty($data['zoneName'])) {
+        if (empty($data['menuName'])) {
             throw new \Ip\Exception("Missing required parameters");
         }
-        $zoneName = $data['zoneName'];
+        $menuName = $data['menuName'];
 
         $responseData = array (
-            'tree' => JsTreeHelper::getPageTree($languageId, $zoneName)
+            'tree' => JsTreeHelper::getPageTree($languageId, $menuName)
         );
 
         return new \Ip\Response\Json($responseData);
@@ -60,19 +60,13 @@ class AdminController extends \Ip\Controller
 
     public function pagePropertiesForm()
     {
-        $data = ipRequest()->getQuery();
-        if (empty($data['zoneName'])) {
+        $navigationId = ipRequest()->getQuery('navigationId');
+        if (!$navigationId) {
             throw new \Ip\Exception("Missing required parameters");
         }
-        $zoneName = $data['zoneName'];
-        if (empty($data['pageId'])) {
-            throw new \Ip\Exception("Missing required parameters");
-        }
-        $pageId = $data['pageId'];
-
 
         $variables = array(
-            'form' => Helper::pagePropertiesForm($zoneName, $pageId)
+            'form' => Helper::pagePropertiesForm($navigationId)
         );
         $layout = ipView('view/pageProperties.php', $variables)->render();
 
