@@ -13,19 +13,12 @@ class PublicController extends \Ip\Controller
         //find current page
         $currentPage = ipCurrentPage();
 
-        $zone = ipContent()->getZone($currentPage->get('zone'));
-
-        if (!$zone) {
-            return new \Ip\Response\PageNotFound();
-        }
-
-        $page = $zone->getCurrentPage();
-        $currentPage->_set('page', $page);
+        $page = $currentPage->getPage();
 
         // redirect if needed
-        if (in_array($page->getType(), array('subpage', 'redirect')) && !ipIsManagementState()) {
-            return new \Ip\Response\Redirect($page->getLink());
-        }
+//        if (in_array($page->getType(), array('subpage', 'redirect')) && !ipIsManagementState()) {
+//            return new \Ip\Response\Redirect($page->getLink());
+//        }
 
         // change layout if safe mode
         if (\Ip\Internal\Admin\Service::isSafeMode()) {

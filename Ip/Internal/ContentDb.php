@@ -67,25 +67,12 @@ class ContentDb {
 
 
     /**
-     * @param string $moduleName
      * @param string $pageId
      * @return string|null
      */
-    public static function getPageLayout($moduleName, $pageId)
+    public static function getPageLayout($pageId)
     {
-        $table = ipTable('page_layout');
-        $sql = "SELECT
-                   `layout`
-                FROM
-                   $table
-                WHERE
-                   module_name = :moduleName
-                   AND `page_id`   = :pageId";
-
-        return ipDb()->fetchValue($sql, array(
-                'moduleName' => $moduleName,
-                'pageId' => $pageId,
-            ));
+        return ipDb()->selectValue('layout', 'page_layout', array('pageId' => $pageId));
     }
 
 }

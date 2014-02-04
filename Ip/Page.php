@@ -78,6 +78,20 @@ class Page{
     {
         $this->id = $id;
         $this->zoneName = $zoneName;
+
+        if ($zoneName == 'page') {
+            $page = ipDb()->selectRow('*', 'page', array('id' => $id));
+
+            if ($page) {
+                $this->navigationTitle = $page['button_title'];
+                $this->pageTitle = $page['page_title'];
+                $this->keywords = $page['keywords'];
+                $this->description = $page['description'];
+                $this->lastModified = $page['last_modified'];
+                $this->createdOn = $page['created_on'];
+                $this->priority = $page['row_number'];
+            }
+        }
     }
 
     /**

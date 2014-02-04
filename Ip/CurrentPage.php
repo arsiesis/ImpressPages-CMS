@@ -44,7 +44,16 @@ class CurrentPage
 
     public function getPage()
     {
-        return isset($this->requestedPage['page']) ? $this->requestedPage['page'] : new \Ip\Page404(1, '404');
+        if (!isset($this->requestedPage['page'])) {
+            return new \Ip\Page404(1, '404');
+        }
+
+        if (is_object($this->requestedPage['page'])) {
+            return $this->requestedPage['page'];
+        }
+
+        $page = new \Ip\Page($this->requestedPage['page']['pageId'], 'page');
+        return $page;
     }
 
     public function getUrlPath()

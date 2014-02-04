@@ -460,7 +460,21 @@ class Model
         \Ip\Internal\Pages\Db::updatePage($revision['zoneName'], $revision['pageId'], $params);
     }
 
+    public static function routePage($relativeUri, \Ip\Request $request)
+    {
+        $page = ipDb()->selectRow('*', 'navigation', array('uri' => $relativeUri, 'isActive' => 1));
 
+        if (!$page) {
+            return NULL;
+        }
 
+        $result['page'] = $page;
+        $result['plugin'] = 'Content';
+        $result['controller'] = 'PublicController';
+        $result['action'] = 'index';
+        $result['urlParts'] = array();
+
+        return $result;
+    }
 
 }

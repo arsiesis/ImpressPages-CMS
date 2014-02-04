@@ -266,16 +266,7 @@ class Content
      */
     public function getDescription()
     {
-        $curZone = ipContent()->getCurrentZone();
-        if (!$curZone) {
-            return '';
-        }
-        $curEl = $curZone->getCurrentPage();
-        if ($curEl && $curEl->getDescription() != '') {
-            return $curEl->getDescription();
-        } else {
-            return $curZone->getDescription();
-        }
+        return ipCurrentPage()->getPage()->getDescription();
     }
 
     /**

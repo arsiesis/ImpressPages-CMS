@@ -34,16 +34,7 @@ class Service
 
     public static function getPageLayout(\Ip\Page $page)
     {
-        $zone = ipContent()->getZone($page->getZoneName());
-        $layout = \Ip\Internal\ContentDb::getPageLayout(
-            $zone->getAssociatedModule(),
-            $page->getId()
-        );
-
-
-        if (!$layout) {
-            $layout = $zone->getLayout();
-        }
+        $layout = \Ip\Internal\ContentDb::getPageLayout($page->getId());
         return $layout;
     }
 
