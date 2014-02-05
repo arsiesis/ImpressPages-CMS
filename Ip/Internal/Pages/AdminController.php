@@ -239,28 +239,27 @@ class AdminController extends \Ip\Controller
 
     public function addPage()
     {
-        ipRequest()->mustBePost();
-        $data = ipRequest()->getPost();
+        $request = ipRequest();
+        $request->mustBePost();
 
-        if (empty($data['zoneName']) || empty($data['languageId'])) {
+        $menuName = $request->getPost('menuName');
+        $languageId = $request->getPost('languageId');
+
+        if (empty($menuName) || empty($languageId)) {
             throw new \Ip\Exception("Missing required parameters");
         }
-        $zoneName = $data['zoneName'];
-        $languageId = $data['languageId'];
 
-        $rootId = Service::getRootId($zoneName, $languageId);
+        $rootId = Service::getRootId($menuName, $languageId);
 
-        if (!empty($data['title'])) {
-            $title = $data['title'];
-        } else {
+        $title = $request->getPost('title');
+        if (empty($title)) {
             $title = __('Untitled', 'ipAdmin', false);
         }
 
-        if (!empty($data['visible'])) {
-            $data['visible'] = (int) $data['visible'];
-        }
+        $data = array();
+        $data['visible]'] = $request->getPost('visible', 0);
 
-        $pageId = Service::addPage($rootId, $title);
+        $pageId = Service::addPage($languageId, $rootId, $title, $data);
 
 
         $answer = array(

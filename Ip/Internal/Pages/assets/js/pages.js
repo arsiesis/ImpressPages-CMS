@@ -69,11 +69,11 @@ var ipPages = null;
 
 
         $scope.setZoneHash = function (zone) {
-            updateHash(null, zone.id);
+            updateHash(null, zone.name);
         }
 
         $scope.setLanguageHash = function (language) {
-            updateHash(language.id, null);
+            updateHash(language.id);
         }
 
 
@@ -289,7 +289,7 @@ var ipPages = null;
                 securityToken: ip.securityToken,
                 title: title,
                 visible: visible,
-                zoneName: $scope.activeMenu.name,
+                menuName: $scope.activeMenu.name,
                 languageId: $scope.activeLanguage.id
             };
 
@@ -452,7 +452,7 @@ var ipPages = null;
                 navigationId = $scope.selectedPageId;
             }
 
-            var path = 'hash&language=' + languageId + '&menuName=' + menuName;
+            var path = 'hash&language=' + languageId + '&menu=' + menuName;
             if (navigationId) {
                 path = path + '&navigation=' + navigationId;
             }

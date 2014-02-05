@@ -40,7 +40,7 @@ class Service
     }
 
 
-    public static function addPage($parentId, $title, $data = array())
+    public static function addPage($languageId, $parentId, $title, $data = array())
     {
         if (!isset($data['navigationTitle'])) {
             $data['navigationTitle'] = $title;
@@ -53,7 +53,6 @@ class Service
             $data['url'] = Db::makeUrl($title);
         }
 
-
         if (!isset($data['createdOn'])) {
             $data['createdOn'] = date("Y-m-d");
         }
@@ -64,23 +63,20 @@ class Service
             $data['visible'] = !ipGetOption('Pages.hideNewPages');
         }
 
-        $newPageId = Db::addPage($parentId, $data);
+        $newPageId = Db::addPage($languageId, $parentId, $data);
 
         return $newPageId;
     }
 
 
     /**
-     * @param string $zoneName
+     * @param string $menuName
      * @param int $languageId
      * @return int
      */
-    public static function getRootId($zoneName, $languageId)
+    public static function getRootId($menuName, $languageId)
     {
-        $zone = ipContent()->getZone($zoneName);
-        $zoneId = $zone->getId();
-        $rootId = Db::rootId($zoneId, $languageId);
-        return $rootId;
+        return ipDb()->selectValue('id', 'navigation', array('languageId' => $languageId, 'name' => $menuName));
     }
 
     public static function copyPage($pageId, $destinationParentId, $destinationPosition)

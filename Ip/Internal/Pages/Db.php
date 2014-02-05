@@ -369,85 +369,82 @@ class Db {
      * @param int $parentId
      * @param array $params
      */
-    public static function addPage($parentId, $params)
+    public static function addPage($languageId, $parentId, $params)
     {
-        $row = array(
-            'parent' => $parentId,
-            'row_number' => self::getMaxIndex($parentId) + 1,
-
-        );
+        $page = array();
 
         //TODOXX sync page service naming. #140
-        if (isset($params['button_title'])) {
-            $params['navigationTitle'] = $params['button_title'];
-        }
         if (isset($params['page_title'])) {
             $params['pageTitle'] = $params['page_title'];
         }
-        if (isset($params['redirect_url'])) {
-            $params['redirectURL'] = $params['redirect_url'];
-        }
-
-        if (isset($params['navigationTitle'])) {
-            $row['button_title'] = $params['navigationTitle'];
-        }
 
         if (isset($params['pageTitle'])) {
-            $row['page_title'] = $params['pageTitle'];
+            $page['page_title'] = $params['pageTitle'];
         }
 
         if (isset($params['keywords'])) {
-            $row['keywords'] = $params['keywords'];
+            $page['keywords'] = $params['keywords'];
         }
 
         if (isset($params['description'])) {
-            $row['description'] = $params['description'];
+            $page['description'] = $params['description'];
         }
 
         if (isset($params['url'])) {
-            $row['url'] = $params['url'];
+            $page['url'] = $params['url'];
         }
 
         if (isset($params['createdOn'])) {
-            $row['created_on'] = $params['createdOn'];
+            $page['created_on'] = $params['createdOn'];
         } else {
-            $row['created_on'] = date('Y-m-d');
+            $page['created_on'] = date('Y-m-d');
         }
 
         if (isset($params['lastModified'])) {
-            $row['last_modified'] = $params['lastModified'];
+            $page['last_modified'] = $params['lastModified'];
         } else {
-            $row['last_modified'] = date('Y-m-d');
+            $page['last_modified'] = date('Y-m-d');
         }
 
         if (isset($params['type'])) {
-            $row['type'] = $params['type'];
+            $page['type'] = $params['type'];
         }
 
         if (isset($params['redirectURL'])) {
-            $row['redirect_url'] = $params['redirectURL'];
+            $page['redirect_url'] = $params['redirectURL'];
         }
 
         if (isset($params['visible'])) {
-            $row['visible'] = (int)$params['visible'];
+            $page['visible'] = (int)$params['visible'];
         }
 
         if (isset($params['cached_html'])) {
-            $row['cached_html'] = $params['cached_html'];
+            $page['cached_html'] = $params['cached_html'];
         }
 
         if (isset($params['cached_text'])) {
-            $row['cached_text'] = $params['cached_text'];
+            $page['cached_text'] = $params['cached_text'];
         }
 
-        $pageId = ipDb()->insert('page', $row);
+        $pageId = ipDb()->insert('page', $page);
+
+        $pageOrder = ipDb()->selectValue('MAX(`pageOrder`) + 1', 'navigation', array(
+                'languageId' => $languageId,
+                'parentId' => $parentId,
+            )
+        );
 
         $navigationRecord = array(
             'pageId' => $pageId,
+            'languageId' => $languageId,
+            'parentId' => $parentId,
+            'pageOrder' => $pageOrder,
         );
 
-        if (!empty($row['url'])) {
-            $navigationRecord['uri'] = $row['url'];
+        if (!empty($page['url'])) {
+            $navigationRecord['slug'] = $page['url'];
+            $parentUri = ipDb()->selectValue('uri', 'navigation', array('id' => $parentId));
+            $navigationRecord['uri'] = $parentUri ? $parentUri . '/' . $page['url'] : $page['url'];
         }
 
         $navigationRecord['languageId'] = ipDb()->selectValue('languageId', 'navigation', array('id' => $parentId));

@@ -27,7 +27,7 @@ class JsTreeHelper
         $navigation = ipDb()->selectRow('*', 'navigation', array('name' => $menuName));
 
         if (!$parentId) {
-            $parentId = 0;
+            $parentId = $navigation['id'];
         }
 
         $pages = ipDb()->selectAll('*', 'navigation', array('parentId' => $parentId), 'ORDER BY `pageOrder`');
