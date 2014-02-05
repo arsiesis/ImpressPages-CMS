@@ -96,7 +96,8 @@ class Event
 
     public static function ipPageDeleted($info)
     {
-        Model::removePageRevisions($info['zoneName'], $info['pageId']);
+        // TODOX remove page revisions
+        // Model::removePageRevisions($info['zoneName'], $info['pageId']);
     }
 
     public static function ipPageMoved($info)

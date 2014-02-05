@@ -156,7 +156,7 @@ class Db {
      */
     public static function pageChildren($parentId)
     {
-        return ipDb()->selectAll('*', 'page', array('parent' => $parentId), 'ORDER BY `row_number`');
+        return ipDb()->selectAll('*', 'navigation', array('parentId' => $parentId), 'ORDER BY `pageOrder`');
     }
 
     /**
@@ -366,7 +366,7 @@ class Db {
     /**
      *
      * Insert new page
-     * @param int $parentId
+     * @param int $parentId navigation parentId
      * @param array $params
      */
     public static function addPage($languageId, $parentId, $params)
@@ -428,17 +428,11 @@ class Db {
 
         $pageId = ipDb()->insert('page', $page);
 
-        $pageOrder = ipDb()->selectValue('MAX(`pageOrder`) + 1', 'navigation', array(
-                'languageId' => $languageId,
-                'parentId' => $parentId,
-            )
-        );
-
         $navigationRecord = array(
             'pageId' => $pageId,
             'languageId' => $languageId,
             'parentId' => $parentId,
-            'pageOrder' => $pageOrder,
+            'pageOrder' => static::getNextPageOrder($languageId, $parentId),
         );
 
         if (!empty($page['url'])) {
@@ -447,26 +441,32 @@ class Db {
             $navigationRecord['uri'] = $parentUri ? $parentUri . '/' . $page['url'] : $page['url'];
         }
 
-        $navigationRecord['languageId'] = ipDb()->selectValue('languageId', 'navigation', array('id' => $parentId));
-        $navigationRecord['parentId'] = $parentId;
-        // $navigationRecord['pageOrder'] = ?
         ipDb()->insert('navigation', $navigationRecord);
     }
 
-    private static function getMaxIndex($parentId) {
-        return ipDb()->selectValue("MAX(`row_number`) AS `max_row_number`", 'page', array('parent' => $parentId));
+    private static function getNextPageOrder($languageId, $parentId)
+    {
+        return ipDb()->selectValue('MAX(`pageOrder`) + 1', 'navigation', array(
+                'languageId' => $languageId,
+                'parentId' => $parentId,
+            )
+        );
     }
 
     /**
      *
      * Delete menu element record
-     * @param int $id
+     * @param int $navigationId
      */
-    public static function deletePage($id)
+    public static function deletePage($navigationId)
     {
-        ipDb()->delete('page', array('id' => $id));
+        $pageId = ipDb()->selectValue('pageId', 'navigation', array('id' => $navigationId));
+        ipDb()->delete('navigation', array('id' => $navigationId));
+        if ($pageId) {
+            ipDb()->delete('page', array('id' => $pageId));
+            ipEvent('ipPageDeleted', array('pageId' => $pageId));
+        }
     }
-
 
     public static function copyPage($nodeId, $newParentId, $newIndex)
     {

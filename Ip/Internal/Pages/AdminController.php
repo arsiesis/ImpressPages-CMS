@@ -274,12 +274,11 @@ class AdminController extends \Ip\Controller
     public function deletePage()
     {
         ipRequest()->mustBePost();
-        $data = ipRequest()->getPost();
+        $pageId = ipRequest()->getPost('pageId');
 
-        if (!isset($data['pageId'])) {
+        if (!$pageId) {
             throw new \Ip\Exception("Page id is not set");
         }
-        $pageId = (int)$data['pageId'];
 
         Service::deletePage($pageId);
 
