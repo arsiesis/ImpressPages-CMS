@@ -144,114 +144,31 @@ class Helper
 
         $form = new \Ip\Form();
 
-        $field = new \Ip\Form\Field\Hidden(
+        $fields = array();
+
+        $fields[] = new \Ip\Form\Field\Hidden(
             array(
                 'name' => 'aa',
                 'value' => 'Pages.updatePage'
             ));
-        $form->addField($field);
 
-
-        $field = new \Ip\Form\Field\Hidden(
+        $fields[] = new \Ip\Form\Field\Hidden(
             array(
                 'name' => 'pageId',
                 'value' => $navigationId
             ));
-        $form->addField($field);
 
-        $field = new \Ip\Form\Field\Text(
-            array(
-                'name' => 'navigationTitle',
-                'label' => __('Navigation title', 'ipAdmin', false),
-                'value' => $navigation['navigationTitle'],
-            ));
-        $form->addField($field);
+        $fields = ipFilter('ipPageFormFields', $fields, array('navigation' => $navigation, 'page' => $page));
 
-        $field = new \Ip\Form\Field\Text(
-            array(
-                'name' => 'pageTitle',
-                'label' => __('Page title', 'ipAdmin', false),
-                'value' => $page->getPageTitle()
-            ));
-        $form->addField($field);
-
-        $field = new \Ip\Form\Field\Text(
-            array(
-                'name' => 'keywords',
-                'label' => __('Keywords', 'ipAdmin', false),
-                'value' => $page->getKeywords()
-            ));
-        $form->addField($field);
-
-        $field = new \Ip\Form\Field\Textarea(
-            array(
-                'name' => 'description',
-                'label' => __('Description', 'ipAdmin', false),
-                'value' => $page->getDescription()
-            ));
-        $form->addField($field);
-
-        $field = new \Ip\Form\Field\Text(
-            array(
-                'name' => 'url',
-                'label' => __('Url', 'ipAdmin', false),
-                'value' => $navigation['slug']
-            ));
-        $form->addField($field);
-
-
-        $field = new \Ip\Form\Field\Checkbox(
-            array(
-                'name' => 'visible',
-                'label' => __('Visible', 'ipAdmin', false),
-                'value' => $page->isVisible()
-            ));
-        $form->addField($field);
-
-
-        $layouts = \Ip\Internal\Design\Service::getLayouts();
-        $options = array();
-        foreach($layouts as $layout) {
-            $options[] = array ($layout, $layout);
-        }
-
-        $curLayout = \Ip\Internal\ContentDb::getPageLayout($page->getId());
-
-//        if (!$curLayout) {
-//            $curLayout = $zone->getLayout();
-//        }
-        $field = new \Ip\Form\Field\Select(
-            array(
-                'name' => 'layout',
-                'label' => __('Layout', 'ipAdmin', false),
-                'values' => $options,
-                'value' => $curLayout
-            ));
-        $form->addField($field);
-
-
-        $field = new \Ip\Form\Field\Text(
-            array(
-                'name' => 'createdOn',
-                'label' => __('Created on', 'ipAdmin', false),
-                'value' => date('Y-m-d', strtotime($page->getCreatedOn()))
-            ));
-        $form->addField($field);
-
-        $field = new \Ip\Form\Field\Text(
-            array(
-                'name' => 'lastModified',
-                'label' => __('Update on', 'ipAdmin', false),
-                'value' => date('Y-m-d', strtotime($page->getLastModified()))
-            ));
-        $form->addField($field);
-
-        $field = new \Ip\Form\Field\Submit(
+        $fields[] = new \Ip\Form\Field\Submit(
             array(
                 'name' => 'submit',
                 'value' => __('Save', 'ipAdmin', false)
             ));
-        $form->addField($field);
+
+        foreach ($fields as $field) {
+            $form->addField($field);
+        }
 
         return $form;
     }

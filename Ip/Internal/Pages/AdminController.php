@@ -293,7 +293,6 @@ class AdminController extends \Ip\Controller
         ipRequest()->mustBePost();
         $data = ipRequest()->getPost();
 
-
         if (!isset($data['pageId'])) {
             throw new \Ip\Exception("Page id is not set");
         }
@@ -303,14 +302,13 @@ class AdminController extends \Ip\Controller
         if (!empty($data['destinationParentId'])) {
             $destinationParentId = $data['destinationParentId'];
         } else {
-            if (!isset($data['zoneName'])) {
+            if (!isset($data['menuName'])) {
                 throw new \Ip\Exception("Missing required parameters");
             }
             if (!isset($data['languageId'])) {
                 throw new \Ip\Exception("Missing required parameters");
             }
-            $zone = ipContent()->getZone($data['zoneName']);
-            $destinationParentId = Db::rootId($zone->getId(), $data['languageId']);
+            $destinationParentId = Db::rootId($data['menuName'], $data['languageId']);
         }
 
 

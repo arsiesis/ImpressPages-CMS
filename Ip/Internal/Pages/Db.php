@@ -133,16 +133,14 @@ class Db {
 
     public static function isChild($pageId, $parentId)
     {
-        $page = self::getPage($pageId);
-        if (!$page) {
-            return FALSE;
-        }
-        if ($page['parent'] == $parentId) {
-            return TRUE;
+        $pageParentId = ipDb()->selectValue('parentId', 'navigation', array('id' => $pageId));
+
+        if ($pageParentId == $parentId) {
+            return true;
         }
 
-        if ($page['parent']) {
-            return self::isChild($page['parent'], $parentId);
+        if ($pageParentId) {
+            return self::isChild($pageParentId, $parentId);
         }
 
         return FALSE;
@@ -195,17 +193,15 @@ class Db {
      * @param $params
      * @return bool
      */
-    public static function updatePage($zoneName, $pageId, $params){
+    public static function updatePage($pageId, $params)
+    {-
         $values = array();
 
-        $zone = ipContent()->getZone($zoneName);
-        if (!$zone) {
-            throw new \Ip\Exception("Page doesn't exist");
-        }
+        $oldPage = ipDb()->selectRow('*', 'navigation', array('id' => $pageId));
 
-        $oldPage = $zone->getPage($pageId);
-        $oldUrl = $oldPage->getLink(true);
+        $oldUrl = $oldPage['uri'];
 
+        /*
         if (isset($params['navigationTitle'])) {
             $values['button_title'] = $params['navigationTitle'];
         }
@@ -285,19 +281,19 @@ class Db {
         if (count($values) == 0) {
             return true; //nothing to update.
         }
+        */
 
         ipDb()->update('page', $values, array('id' => $pageId));
 
-        if (isset($params['url']) && $oldPage->getUrl() != $params['url']) {
-            $newPage = $zone->getPage($pageId);
-            $newUrl = $newPage->getLink(true);
-            ipEvent('ipUrlChanged', array('oldUrl' => $oldUrl, 'newUrl' => $newUrl));
+        if (isset($params['url']) && $oldPage['uri']) {
+            $newPage = ipDb()->selectRow('*', 'navigation', array('id' => $pageId));
+            ipEvent('ipUrlChanged', array('oldUrl' => $oldPage['uri'], 'newUrl' => $newPage['uri']));
         }
 
-        if (!empty($params['layout']) && \Ip\Internal\File\Functions::isFileInDir($params['layout'], ipThemeFile(''))) {
-            $layout = $params['layout'] == $zone->getLayout() ? false : $params['layout']; // if default layout - delete layout
-            self::changePageLayout($zone->getAssociatedModule(), $pageId, $layout);
-        }
+//        if (!empty($params['layout']) && \Ip\Internal\File\Functions::isFileInDir($params['layout'], ipThemeFile(''))) {
+//            $layout = $params['layout'] == $zone->getLayout() ? false : $params['layout']; // if default layout - delete layout
+//            self::changePageLayout($zone->getAssociatedModule(), $pageId, $layout);
+//        }
 
         return true;
     }
