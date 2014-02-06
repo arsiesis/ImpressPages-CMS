@@ -13,35 +13,35 @@ class Filter
 
         $fields[] = new \Ip\Form\Field\Text(
             array(
-                'name' => 'navigationTitle',
+                'name' => 'navigation[navigationTitle]',
                 'label' => __('Navigation title', 'ipAdmin', false),
                 'value' => $navigation['navigationTitle'],
             ));
 
         $fields[] = new \Ip\Form\Field\Text(
             array(
-                'name' => 'pageTitle',
+                'name' => 'page[pageTitle]',
                 'label' => __('Page title', 'ipAdmin', false),
                 'value' => $page->getPageTitle()
             ));
 
         $fields[] = new \Ip\Form\Field\Text(
             array(
-                'name' => 'keywords',
+                'name' => 'page[keywords]',
                 'label' => __('Keywords', 'ipAdmin', false),
                 'value' => $page->getKeywords()
             ));
 
         $fields[] = new \Ip\Form\Field\Textarea(
             array(
-                'name' => 'description',
+                'name' => 'page[description]',
                 'label' => __('Description', 'ipAdmin', false),
                 'value' => $page->getDescription()
             ));
 
         $fields[] = new \Ip\Form\Field\Text(
             array(
-                'name' => 'url',
+                'name' => 'navigation[slug]',
                 'label' => __('Url', 'ipAdmin', false),
                 'value' => $navigation['slug']
             ));
@@ -69,23 +69,36 @@ class Filter
                 'name' => 'layout',
                 'label' => __('Layout', 'ipAdmin', false),
                 'values' => $options,
-                'value' => $curLayout
+//                'value' => $curLayout
             ));
 
         $fields[] = new \Ip\Form\Field\Text(
             array(
-                'name' => 'createdOn',
+                'name' => 'page[createdOn]',
                 'label' => __('Created on', 'ipAdmin', false),
                 'value' => date('Y-m-d', strtotime($page->getCreatedOn()))
             ));
 
         $fields[] = new \Ip\Form\Field\Text(
             array(
-                'name' => 'lastModified',
+                'name' => 'page[lastModified]',
                 'label' => __('Update on', 'ipAdmin', false),
                 'value' => date('Y-m-d', strtotime($page->getLastModified()))
             ));
 
         return $fields;
+    }
+
+    public static function ipPageFormValidate($errors, $data)
+    {
+        if (strtotime($data['page']['createdOn']) === false) {
+            $errors[] = array('field' => 'createdOn', 'message' => __('Incorrect date format. Example:', 'ipAdmin', false).date(" Y-m-d"));
+        }
+
+        if (strtotime($data['page']['lastModified']) === false) {
+            $errors[] = array('field' => 'lastModified', 'message' => __('Incorrect date format. Example:', 'ipAdmin', false).date(" Y-m-d"));
+        }
+
+        return $errors;
     }
 } 

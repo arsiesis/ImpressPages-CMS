@@ -30,15 +30,13 @@ class Service
     }
 
     /**
-     * @param string $zoneName
      * @param int $pageId
      * @param array $data
      */
-    public static function updatePage($zoneName, $pageId, $data)
+    public static function updatePage($pageId, $data)
     {
-        Db::updatePage($zoneName, $pageId, $data);
+        Db::updatePage($pageId, $data);
     }
-
 
     public static function addPage($languageId, $parentId, $title, $data = array())
     {

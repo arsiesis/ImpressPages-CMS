@@ -84,62 +84,27 @@ class AdminController extends \Ip\Controller
         if (empty($data['pageId'])) {
             throw new \Ip\Exception("Missing required parameters");
         }
-        $pageId = (int)$data['pageId'];
 
-        if (empty($data['zoneName'])) {
-            throw new \Ip\Exception("Missing required parameters");
-        }
-        $zoneName = $data['zoneName'];
+        $data['pageId'] = (int)$data['pageId'];
 
-        $answer = array();
+        $errors = ipFilter('ipPageFormValidate', array(), $data);
 
+        if ($errors) {
+            $result = array(
+                'status' => 'error',
+                'errors' => $errors,
 
-
-        //make url
-        if ($data['url'] == '') {
-            if ($data['pageTitle'] != '') {
-                $data['url'] = Db::makeUrl($data['pageTitle'], $pageId);
-            } else {
-                if ($data['navigationTitle'] != '') {
-                    $data['url'] = Db::makeUrl($data['navigationTitle'], $pageId);
-                }
-            }
-        } else {
-            $tmpUrl = str_replace("/", "-", $data['url']);
-            $i = 1;
-            while (!Db::availableUrl($tmpUrl, $pageId)) {
-                $tmpUrl = $data['url'].'-'.$i;
-                $i++;
-            }
-            $data['url'] = $tmpUrl;
-        }
-        //end make url
-
-        if (strtotime($data['createdOn']) === false) {
-            $answer['errors'][] = array('field' => 'createdOn', 'message' => __('Incorrect date format. Example:', 'ipAdmin', false).date(" Y-m-d"));
+            );
+            return \Ip\Response\Json($result);
         }
 
-        if (strtotime($data['lastModified']) === false) {
-            $answer['errors'][] = array('field' => 'lastModified', 'message' => __('Incorrect date format. Example:', 'ipAdmin', false).date(" Y-m-d"));
-        }
+        ipEvent('ipPagePropertiesUpdate', $data);
 
-//      TODOXX implement page type in Pages module #138
-//        if ($data['type'] == 'redirect' && $data['redirectURL'] == '') {
-//            $answer['errors'][] = array('field' => 'redirectURL', 'message' => __('External url can\'t be empty', 'ipAdmin', false));
-//        }
+        $result = array(
+            'status' => 'success',
+        );
 
-        $data['visible'] = !empty($data['visible']);
-        if (empty($answer['errors'])) {
-            Service::updatePage($zoneName, $pageId, $data);
-            $answer['status'] = 'success';
-        } else {
-            $answer['status'] = 'error';
-        }
-
-        return new \Ip\Response\Json($answer);
-
-
-
+        return new \Ip\Response\Json($result);
     }
 
     public function updateZoneForm()

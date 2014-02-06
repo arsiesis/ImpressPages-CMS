@@ -187,108 +187,87 @@ class Db {
         return ipDb()->fetchAll($sql, array($languageId));
     }
 
+    public static function updateNavigationEntry($navigationId, $data)
+    {
+
+    }
+
     /**
-     * @param $zoneName
      * @param $pageId
-     * @param $params
+     * @param $data
      * @return bool
      */
-    public static function updatePage($pageId, $params)
-    {-
-        $values = array();
+    public static function updatePage($pageId, $data)
+    {
+        $update = array();
 
-        $oldPage = ipDb()->selectRow('*', 'navigation', array('id' => $pageId));
-
-        $oldUrl = $oldPage['uri'];
-
-        /*
-        if (isset($params['navigationTitle'])) {
-            $values['button_title'] = $params['navigationTitle'];
+        if (isset($data['navigationTitle'])) {
+            $update['button_title'] = $data['navigationTitle'];
         }
 
-        if (isset($params['pageTitle'])) {
-            $values['page_title'] = $params['pageTitle'];
+        if (isset($data['pageTitle'])) {
+            $update['page_title'] = $data['pageTitle'];
         }
 
-        if (isset($params['keywords'])) {
-            $values['keywords'] = $params['keywords'];
+        if (isset($data['keywords'])) {
+            $update['keywords'] = $data['keywords'];
         }
 
-        if (isset($params['description'])) {
-            $values['description'] = $params['description'];
+        if (isset($data['description'])) {
+            $update['description'] = $data['description'];
         }
 
-        if (isset($params['url'])) {
-            if ($params['url'] == '') {
-                if (isset($params['pageTitle']) && $params['pageTitle'] != '') {
-                    $params['url'] = self::makeUrl($params['pageTitle'], $pageId);
-                } else {
-                    if (isset($params['navigationTitle']) && $params['navigationTitle'] != '') {
-                        $params['url'] = self::makeUrl($params['navigationTitle'], $pageId);
-                    } else {
-                        $params['url'] = self::makeUrl('page', $pageId);
-                    }
-                }
-            } else {
-                $tmpUrl = str_replace("/", "-", $params['url']);
-                $i = 1;
-                while (!self::availableUrl($tmpUrl, $pageId)) {
-                    $tmpUrl = $params['url'].'-'.$i;
-                    $i++;
-                }
-                $params['url'] = $tmpUrl;
-            }
-
-            $values['url'] = $params['url'];
+        if (isset($data['createdOn']) && strtotime($data['createdOn']) !== false) {
+            $update['created_on'] = $data['createdOn'];
         }
 
-        if (isset($params['createdOn']) && strtotime($params['createdOn']) !== false) {
-            $values['created_on'] = $params['createdOn'];
+        if (isset($data['lastModified']) && strtotime($data['lastModified']) !== false) {
+            $update['last_modified'] = $data['lastModified'];
         }
 
-        if (isset($params['lastModified']) && strtotime($params['lastModified']) !== false) {
-            $values['last_modified'] = $params['lastModified'];
+        if (isset($data['type'])) {
+            $update['type'] = $data['type'];
         }
 
-        if (isset($params['type'])) {
-            $values['type'] = $params['type'];
+        if (isset($data['redirectURL'])) {
+            $update['redirect_url'] = $data['redirectURL'];
         }
 
-        if (isset($params['redirectURL'])) {
-            $values['redirect_url'] = $params['redirectURL'];
+        if (isset($data['visible'])) {
+            $update['visible'] = $data['visible'];
         }
 
-        if (isset($params['visible'])) {
-            $values['visible'] = $params['visible'];
+        if (isset($data['parentId'])) {
+            $update['parent'] = $data['parentId'];
         }
 
-        if (isset($params['parentId'])) {
-            $values['parent'] = $params['parentId'];
+        if (isset($data['rowNumber'])) {
+            $update['row_number'] = $data['rowNumber'];
         }
 
-        if (isset($params['rowNumber'])) {
-            $values['row_number'] = $params['rowNumber'];
+        if (isset($data['cached_html'])) {
+            $update['cached_html'] = $data['cached_html'];
         }
 
-        if (isset($params['cached_html'])) {
-            $values['cached_html'] = $params['cached_html'];
+        if (isset($data['cached_text'])) {
+            $update['cached_text'] = $data['cached_text'];
         }
 
-        if (isset($params['cached_text'])) {
-            $values['cached_text'] = $params['cached_text'];
-        }
-
-        if (count($values) == 0) {
+        if (count($update) == 0) {
             return true; //nothing to update.
         }
-        */
 
-        ipDb()->update('page', $values, array('id' => $pageId));
+        $dump = array(
+            'pageId' => $pageId,
+            'update' => $update,
+        );
 
-        if (isset($params['url']) && $oldPage['uri']) {
-            $newPage = ipDb()->selectRow('*', 'navigation', array('id' => $pageId));
-            ipEvent('ipUrlChanged', array('oldUrl' => $oldPage['uri'], 'newUrl' => $newPage['uri']));
-        }
+        ipDb()->update('page', $update, array('id' => $pageId));
+
+//        if (isset($data['url']) && $oldPage['uri']) {
+//            $newPage = ipDb()->selectRow('*', 'navigation', array('id' => $pageId));
+//            ipEvent('ipUrlChanged', array('oldUrl' => $oldPage['uri'], 'newUrl' => $newPage['uri']));
+//        }
 
 //        if (!empty($params['layout']) && \Ip\Internal\File\Functions::isFileInDir($params['layout'], ipThemeFile(''))) {
 //            $layout = $params['layout'] == $zone->getLayout() ? false : $params['layout']; // if default layout - delete layout
@@ -482,13 +461,13 @@ class Db {
 
 
     /**
-     * @param string $url
+     * @param string $uri
      * @param int $allowed_id
      * @returns bool true if url is available ignoring $allowed_id page.
      */
-    public static function availableUrl($url, $allowedId = null){
-
-        $pageId = ipDb()->selectValue('`id`', 'page', array('url' => $url));
+    public static function availableUrl($uri, $allowedId = null)
+    {
+        $pageId = ipDb()->selectValue('`id`', 'navigation', array('uri' => $uri));
 
         if (!$pageId) {
             return true;
