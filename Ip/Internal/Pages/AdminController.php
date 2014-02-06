@@ -361,20 +361,15 @@ class AdminController extends \Ip\Controller
     {
         $data = ipRequest()->getQuery();
 
-
-        if (!isset($data['pageId'])) {
-            throw new \Ip\Exception("Page id is not set");
+        if (!isset($data['navigationId'])) {
+            throw new \Ip\Exception("Navigation id is not set");
         }
-        $pageId = (int)$data['pageId'];
+        $navigationId = (int)$data['navigationId'];
 
-        $pageInfo = Db::pageInfo($pageId);
+        $navigation = ipDb()->selectRow('*', 'navigation', array('id' => $navigationId));
 
-        $zoneName = Db::getZoneName($pageInfo['zone_id']);
-        $zone = IpContent()->getZone($zoneName);
-
-        $page = $zone->getPage($pageId);
         $answer = array (
-            'pageUrl' => $page->getLink()
+            'pageUrl' => ipCurrentPage()->getLanguage()->getLink() . $navigation['uri']
         );
 
         return new \Ip\Response\Json($answer);

@@ -341,10 +341,10 @@ var ipPages = null;
         }
 
 
-        var editPage = function (pageId, successCallback) {
+        var editPage = function (navigationId, successCallback) {
             var data = {
                 aa: 'Pages.getPageUrl',
-                pageId: pageId
+                navigationId: navigationId
             };
 
             $.ajax({
