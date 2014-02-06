@@ -154,7 +154,7 @@ class Helper
 
         $fields[] = new \Ip\Form\Field\Hidden(
             array(
-                'name' => 'pageId',
+                'name' => 'navigationId',
                 'value' => $navigationId
             ));
 

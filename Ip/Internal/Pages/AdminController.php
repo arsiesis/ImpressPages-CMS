@@ -81,11 +81,11 @@ class AdminController extends \Ip\Controller
         ipRequest()->mustBePost();
         $data = ipRequest()->getPost();
 
-        if (empty($data['pageId'])) {
+        if (empty($data['navigationId'])) {
             throw new \Ip\Exception("Missing required parameters");
         }
 
-        $data['pageId'] = (int)$data['pageId'];
+        $data['navigationId'] = (int)$data['navigationId'];
 
         $errors = ipFilter('ipPageFormValidate', array(), $data);
 

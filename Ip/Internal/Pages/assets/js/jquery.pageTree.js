@@ -9,7 +9,6 @@
 
     var methods = {
         init : function(options) {
-            console.log('jquery.pageTree.js', options);
             return this.each(function() {
                 var $this = $(this);
 
@@ -97,8 +96,6 @@
         plugins.push('crrm');
         plugins.push('dnd');
         //plugins.push('contextmenu');
-
-        console.log('$this', $this);
 
         $this.jstree({
 

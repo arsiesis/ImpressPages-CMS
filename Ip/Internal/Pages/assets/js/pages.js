@@ -96,7 +96,11 @@ var ipPages = null;
                 menuName: menuName
             });
             $properties.off('update.ipPages').on('update.ipPages', function () {
-                getJsTree().set_text(getJsTree().get_selected(), $properties.find('input[name=navigationTitle]').val());
+                var title = $properties.find('input[name=\'navigation[navigationTitle]\']').val();
+                if (title == '') {
+                    title = $properties.find('input[name=\'page[pageTitle]\']').val();
+                }
+                getJsTree().set_text(getJsTree().get_selected(), title);
             });
             $properties.off('delete.ipPages').on('delete.ipPages', function () {
                 deletePage($scope.selectedPageId, function () {

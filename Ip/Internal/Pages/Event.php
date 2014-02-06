@@ -41,7 +41,7 @@ class Event
 
         $navigation = $data['navigation'];
 
-        $oldNavigation = ipDb()->selectRow('*', 'navigation', array('id' => $data['pageId']));
+        $oldNavigation = ipDb()->selectRow('*', 'navigation', array('id' => $data['navigationId']));
 
         //make url
         if ($navigation['slug'] != $oldNavigation['slug']) {
@@ -75,7 +75,7 @@ class Event
             // TODOX url change event (just not here!)
         }
 
-        ipDb()->update('navigation', $navigation, array('id' => $data['pageId']));
+        ipDb()->update('navigation', $navigation, array('id' => $data['navigationId']));
         //end make url
 
 //      TODOXX implement page type in Pages module #138
@@ -97,7 +97,7 @@ class Event
             return;
         }
 
-        $pageId = ipDb()->selectValue('pageId', 'navigation', array('id' => $data['pageId']));
+        $pageId = ipDb()->selectValue('pageId', 'navigation', array('id' => $data['navigationId']));
 
         Service::updatePage($pageId, $data['page']);
     }
