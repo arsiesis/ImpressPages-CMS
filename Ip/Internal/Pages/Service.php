@@ -94,7 +94,7 @@ class Service
         }
 
         //report url change
-        $oldUrl = ipDb()->selectValue('uri', 'navigation', array('id' => $pageId));
+        $oldUrl = ipCurrentPage()->getLanguage()->getLink() . ipDb()->selectValue('uri', 'navigation', array('id' => $pageId));
         //report url change
 
         $newParentChildren = Db::pageChildren($destinationParentId);
@@ -118,10 +118,7 @@ class Service
         Db::updatePage($pageId, $data);
 
         //report url change
-        $page = $destinationZone->getPage($pageId);
-        $newUrl = $page->getLink();
-
-        ipEvent('ipUrlChanged', array('oldUrl' => $oldUrl, 'newUrl' => $newUrl));
+        ipEvent('ipUrlChanged', array('oldUrl' => $oldUrl, 'newUrl' => ipCurrentPage()->getLanguage()->getLink()));
         //report url change
     }
 
